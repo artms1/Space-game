@@ -9,6 +9,9 @@ public class Player: MonoBehaviour
     public float speed = 6f;
     public float shildOnTimeForTimer = 6f;
     protected bool shildOn = true;
+    float timerWeapon = 0f;
+    public float timerWeaponOn = 0.1f;
+    public float timerTurnWeapon = 1f;
 
     private Rigidbody2D rb;
     [SerializeField] private GameObject[] particals;
@@ -62,6 +65,8 @@ public class Player: MonoBehaviour
             particals[i].SetActive(visibl[i]);
         }
 
+        fireOn = fireOn && timerWeaponOn > timerWeapon;
+        this.fire.SetActive(fireOn);
         if (fireOn)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position+new Vector3(2f,0,0), Vector2.right);
@@ -71,18 +76,44 @@ public class Player: MonoBehaviour
                 GarbageController garbage = hit.collider.gameObject.GetComponent<GarbageController>();
                 if (garbage != null)
                 {
-                    garbage.DestroyObj();
-                    ScoreScript.scoreValue += 1;
+                    garbage.HitObj(1);
+                    SceneController.UpdateScore(1);
+                    timerWeapon = timerTurnWeapon;
+                }
+                
+                BossController boss = hit.collider.gameObject.GetComponent<BossController>();
+                if (boss != null)
+                {
+                    boss.HitObj(1);
+                    SceneController.UpdateScore(1);
+                    timerWeapon = timerTurnWeapon;
                 }
             }
+
         }
 
-        this.fire.SetActive(fireOn);
+        if (fireOn)
+        {
+            timerWeapon += Time.deltaTime;
+        }
+        else
+        {
+            timerWeapon -= Time.deltaTime;
+        }
+        timerWeapon = Mathf.Max(timerWeapon, 0);
+
+        if (timerWeaponOn < timerWeapon && fireOn)
+        {
+            fireOn = false;
+            timerWeapon = timerTurnWeapon;
+        
+        }
+
     }
 
-    public void Ship_Attack ()
+    public void Ship_Attack (int damage = 0)
     {
-        if (shildOn)
+        if (shildOn && damage == 0)
         {
             shildOn = false;
             Shield.SetActive(false);
@@ -93,7 +124,7 @@ public class Player: MonoBehaviour
             SceneController.blowUp.transform.position = transform.position;
             SceneController.blowUp.SetActive(true);
             this.gameObject.SetActive(false);
-            Invoke("DistroyOff",0.5f);
+            Invoke("DestroyOff",0.5f);
         }
     }
     
@@ -103,7 +134,7 @@ public class Player: MonoBehaviour
         Shield.SetActive(shildOn);
     }
 
-    void DistroyOff ()
+    void DestroyOff ()
     {
         SceneController.blowUp.SetActive(false);
         SceneController.GameOvertTrue();

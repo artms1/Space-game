@@ -5,34 +5,34 @@ using UnityEngine;
 public class GarbageController : MonoBehaviour
 {
 
-    public float Speed = 0f;
+    public float speedX = 0f;
+    public float speedY = 0f;
     public float startSpeed = 0.1f;
     public float rotationSpeed = 2f;
+    private bool generateLP;
     
-    [SerializeField] private SceneController SceneController;
     private int _id;
+    [SerializeField] private SceneController sceneController;
     
     void Start()
     {
-       // Destroy(gameObject,1);
-    }
+   }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        transform.position = new Vector3(transform.position.x-Speed,transform.position.y);
+        transform.position = new Vector3(transform.position.x-speedX,transform.position.y+speedY);
         transform.Rotate(0,0,rotationSpeed);
     }
     
-    public void SetRandom(float startSpeed,  Sprite image)
+    public void SetRandom(float startSpeed,  Sprite image, bool generateLP =false)
     {
+        this.generateLP = generateLP;
         this.startSpeed = startSpeed;
         GetComponent<SpriteRenderer>().sprite = image;
         RandomRotationSpeed();
         RandomSpeed();
-        int destroyTimer = Mathf.RoundToInt( 0.5f/Speed);
-        //Debug.Log(startSpeed);
-      //  Debug.Log(destroyTimer);
+        int destroyTimer = Mathf.RoundToInt( 1f/speedX);
         SetDestroy(destroyTimer);
     }
     
@@ -50,7 +50,8 @@ public class GarbageController : MonoBehaviour
     }
     public void RandomSpeed()
     {
-        Speed = Random.Range(startSpeed/2, startSpeed*2);
+        speedX = Random.Range(startSpeed/2, startSpeed);
+        speedY = Random.Range(0, 0.001f/speedX);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -59,35 +60,46 @@ public class GarbageController : MonoBehaviour
         if (player != null)
         {
 
-            if (PlayerPrefs.GetInt("HiScore") < ScoreScript.scoreValue )
+            if (PlayerPrefs.GetInt("HiScore") < SceneController.scoreValue )
             {
-                PlayerPrefs.SetInt("HiScore", ScoreScript.scoreValue );
+                PlayerPrefs.SetInt("HiScore", SceneController.scoreValue );
             }
 
             player.Ship_Attack();
-            DestroyObj(); 
+            HitObj(0,true); 
         }
         
         EndOffArea Scene_Area = other.GetComponent<EndOffArea>();
         if (Scene_Area != null)
         {
-            DestroyObject(); 
+            Destroy(gameObject);
         }
 
     } 
     
-    public void DestroyObj()
+    public void HitObj(int hit,bool destroyObj = false)
     {
-        GameObject blowUp = SceneController.GetComponent<SceneController>().blowUp;
+        GameObject blowUp = sceneController.blowUp;
         blowUp.transform.position = transform.position;
         blowUp.SetActive(true);
         this.gameObject.SetActive(false);
-        Invoke("DestroyObject",0.5f);
+        Invoke("DestroyObject",0.2f);
     }
+    
     public void DestroyObject()
     {
-        SceneController.GetComponent<SceneController>().blowUp.SetActive(false);
-        Destroy(this.gameObject); 
+
+       sceneController.blowUp.SetActive(false);
+       if (generateLP)
+       {
+            GetComponent<SpriteRenderer>().sprite = sceneController.imagesLP[0];
+            this.gameObject.SetActive(true);
+            generateLP = false;
+       }
+       else
+       {
+           Destroy(this.gameObject);    
+       }
     }
     
 }

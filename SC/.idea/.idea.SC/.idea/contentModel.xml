@@ -15,9 +15,11 @@
           </e>
         </e>
         <e p="Scripts" t="Include">
+          <e p="BossController.cs" t="Include" />
           <e p="GarbageController.cs" t="Include" />
           <e p="Player.cs" t="Include" />
           <e p="SceneController.cs" t="Include" />
+          <e p="StaticClass.cs" t="Include" />
         </e>
         <e p="Standard Assets" t="Include">
           <e p="CrossPlatformInput" t="Include">
@@ -47,7 +49,6 @@
         <e p="UI" t="Include">
           <e p="Scripts" t="Include">
             <e p="MainMenu.cs" t="Include" />
-            <e p="ScoreScript.cs" t="Include" />
           </e>
         </e>
         <e p="UnityAds" t="Include">

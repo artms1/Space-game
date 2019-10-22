@@ -6,34 +6,55 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-    public Text HiScore;
-    public Text textMusicOn;
+    [SerializeField] private Text HiScore;
+    [SerializeField] private Text textMusicOn;
     [SerializeField] private Camera camera;
+    [SerializeField] private GameObject PanelLevels;
+    [SerializeField] private GameObject[] buttons;
+    private int maxLevel;
     
      // Start is called before the first frame update
     public void Start ()
     {
-        HiScore.text = "Hi score: " + PlayerPrefs.GetInt("HiScore",  0);
+        maxLevel = PlayerPrefs.GetInt("LEVEL", 1);
+        
+        StaticClass.StartScore = 0;
+        if (HiScore != null)
+        {
+            HiScore.text = "Hi score: " + PlayerPrefs.GetInt("HiScore", 0);
+        }
+
+        for (int i = maxLevel; i < buttons.Length; i++)
+        {
+            Image spr = buttons[i].GetComponent<Image>();
+            spr.color = Color.grey;
+            ;
+        }
+
         MusicOnVolume();
+        
     }
     // Start is called before the first frame update
-    public void PlayGame ()
+    public void PlayGame (int startLevel)
     {
-        SceneManager.LoadScene("GameScene");
+        if (maxLevel >= startLevel)
+        {
+            StaticClass.level = startLevel;
+            SceneManager.LoadScene("GameScene");
+        }
+    }
+    
+    // Start is called before the first frame update
+    public void OpenMenuLevels (bool flagOpenMenu)
+    {
+        PanelLevels.SetActive(flagOpenMenu);
     }
     
     // Start is called before the first frame update
     public void MusicOn ()
     {
         int musicOn = PlayerPrefs.GetInt("MusicOn", 1);
-        if (musicOn == 1)
-        {
-            musicOn = 0;
-        }
-        else
-        {
-            musicOn = 1;
-        }
+        musicOn = musicOn == 1 ? 0 : 1;
         PlayerPrefs.SetInt("MusicOn", musicOn);
         MusicOnVolume();
     }
@@ -56,12 +77,19 @@ public class MainMenu : MonoBehaviour
         if (musicOn == 1)
         {
             AudioSource.volume = 1f;
-            textMusicOn.text = "Music: on";
+            if (textMusicOn != null)
+            {
+                textMusicOn.text = "Music: on";
+            }
         }
         else
         {
             AudioSource.volume = 0f;
-            textMusicOn.text = "Music: off";
+            if (textMusicOn != null)
+            {
+                textMusicOn.text = "Music: off";
+            }
         }
     }
+
     }
